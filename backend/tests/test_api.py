@@ -101,6 +101,17 @@ def test_creates_ordered_country_and_default_offer_flows():
     assert db.record.google_stream_id == 71
 
 
+def test_unknown_country_code_is_rejected_before_keitaro_write():
+    fake = FakeKeitaro()
+    client, _ = client_with(fake)
+    request = payload()
+    request["geo"] = "ZZ"
+    response = client.post("/api/campaigns", json=request)
+    assert response.status_code == 422
+    assert "ISO 3166-1" in response.json()["detail"]
+    assert fake.calls == []
+
+
 def test_failed_second_stream_archives_incomplete_campaign():
     fake = FakeKeitaro()
     fake.fail_second_stream = True

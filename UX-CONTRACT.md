@@ -10,14 +10,15 @@
 |---|---|
 | Порядок потоков и имя | Текст тестового задания и уточнение пользователя о `test_фамилия_` |
 | Параметры API | [Keitaro Admin API](https://admin-api.docs.keitaro.io/) |
+| Список GEO | ISO 3166-1 через `pycountry`; доступность гео в трекере зависит от геобазы Keitaro |
 | Наблюдаемая конфигурация тестового трекера | Проверка справочников и потоков через Admin API, 2026-11-19 |
 
 ## Canonical UI Map
 
 | Capability | Owner | Behavior |
 |---|---|---|
-| Select/Listbox | Нативные `<select>` в `frontend/src/app/app.html` | Клавиатура и выбор платформы |
-| Form | `App.createCampaign` и FastAPI `CreateCampaign` | Проверка обязательных полей на фронте и сервере |
+| Select/Listbox | Нативные `<select>` в `frontend/src/app/app.html` | Страна выбирается по названию и коду; клавиатура и выбор платформы |
+| Form | `App.createCampaign`, FastAPI `CreateCampaign` и `COUNTRY_CODES` | Проверка обязательных полей и кода страны на фронте и сервере |
 | Scrollbar | `frontend/src/app/app.css` | Прокрутка списка кампаний; форма прокручивается страницей |
 | Feedback | `App.error` и `App.notice` | Видимые сообщения с live-region semantics |
 | CRUD | `App` + `backend/app/main.py` | Запрос, ожидание, проверка ответа и перечитывание данных |

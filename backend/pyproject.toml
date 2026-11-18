@@ -10,6 +10,7 @@ dependencies = [
   "alembic>=1.17,<2",
   "httpx>=0.28,<1",
   "python-dotenv>=1.2,<2",
+  "pycountry>=24.6.1,<27",
 ]
 
 [dependency-groups]

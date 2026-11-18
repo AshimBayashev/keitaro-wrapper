@@ -5,7 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 
 type Option = { id: number; name: string };
-type Meta = { domains: Option[]; groups: Option[]; sources: Option[]; offers: Option[] };
+type Country = { code: string; name: string };
+type Meta = { countries: Country[]; domains: Option[]; groups: Option[]; sources: Option[]; offers: Option[] };
 type Campaign = {
   id: number;
   name: string;
@@ -38,6 +39,7 @@ type Detail = { campaign: Campaign; streams: Stream[] };
 })
 export class App implements OnInit {
   readonly meta = signal<Meta | null>(null);
+  readonly countries = signal<Country[]>([]);
   readonly campaigns = signal<Campaign[]>([]);
   readonly detail = signal<Detail | null>(null);
   readonly prefix = signal('test_bayashev_');
@@ -116,6 +118,18 @@ export class App implements OnInit {
       ]);
       this.prefix.set(config.name_prefix);
       this.meta.set(meta);
+      const displayNames = typeof Intl.DisplayNames === 'function'
+        ? new Intl.DisplayNames(['ru'], { type: 'region' })
+        : null;
+      const collator = new Intl.Collator('ru');
+      this.countries.set(
+        meta.countries
+          .map((country) => ({
+            code: country.code,
+            name: displayNames?.of(country.code) ?? country.name,
+          }))
+          .sort((left, right) => collator.compare(left.name, right.name)),
+      );
       this.campaigns.set(page.items);
       this.hasMore.set(page.has_more);
       this.nextOffset.set(page.next_offset);
@@ -190,13 +204,13 @@ export class App implements OnInit {
     this.clearFeedback();
     if (
       !this.form.suffix.trim() ||
-      !/^[A-Za-z]{2}$/.test(this.form.geo) ||
+      !this.countries().some((country) => country.code === this.form.geo) ||
       !this.form.offer_id ||
       !this.form.domain_id ||
       !this.form.group_id ||
       !this.form.traffic_source_id
     ) {
-      this.error.set('Заполните окончание названия, двухбуквенный GEO и все настройки кампании.');
+      this.error.set('Заполните окончание названия, выберите страну и все настройки кампании.');
       return;
     }
     this.busy.set(true);
@@ -205,7 +219,7 @@ export class App implements OnInit {
       const result = await firstValueFrom(
         this.http.post<{ id: number; warning: string | null }>('/api/campaigns', {
           name: this.fullName,
-          geo: this.form.geo.toUpperCase(),
+          geo: this.form.geo,
           offer_id: Number(this.form.offer_id),
           domain_id: Number(this.form.domain_id),
           group_id: Number(this.form.group_id),

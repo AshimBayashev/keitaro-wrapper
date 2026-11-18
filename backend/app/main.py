@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from .config import settings
+from .countries import COUNTRIES, COUNTRY_CODES
 from .db import SessionLocal
 from .keitaro import KeitaroClient, KeitaroError
 from .models import CampaignRecord
@@ -64,6 +65,7 @@ async def meta(client: KeitaroClient = Depends(get_client)):
         client.get("offers"),
     )
     return {
+        "countries": COUNTRIES,
         "domains": [{"id": x["id"], "name": x["name"]} for x in domains if x.get("state") == "active"],
         "groups": [{"id": x["id"], "name": x["name"]} for x in groups if x.get("type") == "campaigns"],
         "sources": [{"id": x["id"], "name": x["name"]} for x in sources if x.get("state") == "active"],
@@ -149,6 +151,8 @@ async def validate_create(request: CreateCampaign, client: KeitaroClient):
     name = request.name.strip()
     if not name.startswith(settings.name_prefix) or len(name) <= len(settings.name_prefix):
         raise HTTPException(422, f"Название должно начинаться с {settings.name_prefix} и содержать окончание")
+    if request.geo not in COUNTRY_CODES:
+        raise HTTPException(422, "Выберите страну из списка. GEO-код не найден в ISO 3166-1.")
     domain, offer, source, groups = await asyncio.gather(
         client.get(f"domains/{request.domain_id}"),
         client.get(f"offers/{request.offer_id}"),

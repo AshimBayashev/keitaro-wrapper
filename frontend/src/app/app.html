@@ -120,16 +120,19 @@
               </div>
               <div class="field-grid">
                 <div class="field">
-                  <label for="geo">GEO-код страны</label
-                  ><input
+                  <label for="geo">Страна</label
+                  ><select
                     id="geo"
                     name="geo"
                     [(ngModel)]="form.geo"
-                    maxlength="2"
-                    placeholder="US"
-                    autocomplete="off"
                     required
-                  /><small>Две латинские буквы, например US.</small>
+                  >
+                    <option value="">Выберите страну</option>
+                    @for (country of countries(); track country.code) {
+                      <option [value]="country.code">{{ country.name }} · {{ country.code }}</option>
+                    }
+                  </select>
+                  <small>Код страны будет использован в фильтре Keitaro.</small>
                 </div>
                 <div class="field">
                   <label for="offer">ID оффера Keitaro</label
