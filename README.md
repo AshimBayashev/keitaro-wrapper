@@ -62,8 +62,4 @@ npm run build
 
 API: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs). Основные маршруты: `GET /api/meta`, `GET /api/campaigns`, `GET /api/campaigns/{id}`, `POST /api/campaigns`, `POST /api/streams/{id}/offers`, `DELETE /api/streams/{id}/offers/{offer_id}`.
 
-## Ограничения
-
-Приложение рассчитано на локальный запуск доверенным оператором. Собственной авторизации нет; не публикуйте FastAPI в открытом интернете без неё. Keitaro остаётся источником истины. В выдаваемом тестовом аккаунте может не быть прав на создание новых офферов — редактор работает с уже существующими активными офферами.
-
 Документация API: [Keitaro Admin API](https://admin-api.docs.keitaro.io/), [руководство по авторизации](https://docs.keitaro.io/en/development/admin-api.html).
