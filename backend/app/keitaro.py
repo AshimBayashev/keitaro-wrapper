@@ -31,10 +31,27 @@ class KeitaroClient:
         if response.is_error:
             try:
                 body = response.json()
-                message = body.get("error") or body.get("message") or response.reason_phrase
-            except (ValueError, AttributeError):
+            except ValueError:
+                body = None
+            if (
+                method == "POST"
+                and path.strip("/") == "campaigns"
+                and isinstance(body, dict)
+                and any("already used" in str(error).lower() for error in body.get("name", []))
+            ):
+                raise KeitaroError(
+                    "Кампания с таким названием уже существует. Укажите другое окончание.", 409
+                )
+            if isinstance(body, dict):
+                message = body.get("error") or body.get("message")
+                if not isinstance(message, str) or not message:
+                    message = "; ".join(
+                        f"{field}: {', '.join(map(str, errors)) if isinstance(errors, list) else errors}"
+                        for field, errors in body.items()
+                    ) or response.reason_phrase
+            else:
                 message = response.reason_phrase
-            status = 404 if response.status_code == 404 else 502
+            status = response.status_code if response.status_code in (403, 404, 409, 422) else 502
             raise KeitaroError(f"Keitaro: {message}", status)
         if not response.content:
             return None
