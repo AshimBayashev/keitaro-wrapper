@@ -1,0 +1,47 @@
+:root {
+  font-family: 'Segoe UI Variable', 'Segoe UI', Arial, sans-serif;
+  color: #16333e;
+  background: #f2f5f5;
+  font-synthesis: none;
+}
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+}
+button,
+input,
+select {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
+}
+a {
+  color: inherit;
+}
+::selection {
+  background: #b8e4df;
+  color: #102d36;
+}
+:focus-visible {
+  outline: 3px solid #2eaaa4;
+  outline-offset: 2px;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

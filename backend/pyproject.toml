@@ -1,0 +1,21 @@
+[project]
+name = "keitaro-wrapper-api"
+version = "0.1.0"
+description = "FastAPI wrapper for Keitaro campaign creation and offer editing"
+requires-python = ">=3.13,<3.16"
+dependencies = [
+  "fastapi>=0.120,<1",
+  "uvicorn[standard]>=0.38,<1",
+  "sqlalchemy>=2.0,<3",
+  "alembic>=1.17,<2",
+  "httpx>=0.28,<1",
+  "python-dotenv>=1.2,<2",
+]
+
+[dependency-groups]
+dev = ["pytest>=8.4,<10", "pytest-asyncio>=1.2,<2"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]

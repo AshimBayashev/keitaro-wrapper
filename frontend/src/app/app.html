@@ -1,0 +1,426 @@
+<div class="app-shell">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">K<span>·</span></span>
+      <div><strong>Campaign Studio</strong><small>Keitaro control desk</small></div>
+    </div>
+    <div class="topbar-right">
+      <span class="environment"><span class="status-dot"></span> Тестовый трекер</span
+      ><span class="topbar-divider"></span><span class="topbar-label">Создание и офферы</span>
+    </div>
+  </header>
+
+  <div class="workspace">
+    <aside class="sidebar" aria-label="Навигация по кампаниям">
+      <div class="side-heading">
+        <span>Загружено кампаний</span><span class="side-count">{{ campaigns().length }}</span>
+      </div>
+      <button class="new-button" type="button" (click)="view.set('create'); clearFeedback()">
+        <span class="plus">＋</span> Новая кампания
+      </button>
+      <div class="sidebar-section-label">Кампании в Keitaro</div>
+      <label class="search-box"
+        ><span class="search-icon">⌕</span
+        ><span class="sr-only">Поиск кампании по названию или ID</span
+        ><input type="search" [(ngModel)]="campaignQuery" placeholder="Название или ID"
+      /></label>
+      <div class="direct-lookup">
+        <label for="direct-id">Открыть по ID</label>
+        <div>
+          <input
+            id="direct-id"
+            type="number"
+            min="1"
+            [(ngModel)]="directCampaignId"
+            placeholder="Например, 214563"
+            (keydown.enter)="openById()"
+          /><button type="button" (click)="openById()" aria-label="Открыть кампанию по ID">
+            →
+          </button>
+        </div>
+      </div>
+      <div class="campaign-list">
+        @if (loading()) {
+          <div class="sidebar-state">Загружаем кампании…</div>
+        } @else if (filteredCampaigns.length === 0) {
+          <div class="sidebar-state">Кампании не найдены</div>
+        } @else {
+          @for (campaign of filteredCampaigns; track campaign.id) {
+            <button
+              type="button"
+              class="campaign-item"
+              [class.selected]="detail()?.campaign?.id === campaign.id && view() === 'edit'"
+              (click)="openCampaign(campaign.id)"
+            >
+              <span class="campaign-item-main"
+                ><span class="campaign-name">{{ campaign.name }}</span
+                ><span class="campaign-id">#{{ campaign.id }}</span></span
+              >
+              <span class="item-chevron">›</span>
+            </button>
+          }
+        }
+      </div>
+      @if (hasMore() && !campaignQuery) {
+        <button class="load-more" type="button" [disabled]="busy()" (click)="loadMore()">
+          Показать ещё кампании ↓
+        </button>
+      }
+      <div class="sidebar-foot">Данные загружаются напрямую из Keitaro Admin API.</div>
+    </aside>
+
+    <main class="main">
+      @if (error()) {
+        <div class="alert error" role="alert">
+          <span>!</span>
+          <p>{{ error() }}</p>
+          <button type="button" (click)="error.set('')" aria-label="Закрыть ошибку">×</button>
+        </div>
+      }
+      @if (notice()) {
+        <div class="alert success" role="status">
+          <span>✓</span>
+          <p>{{ notice() }}</p>
+          <button type="button" (click)="notice.set('')" aria-label="Закрыть сообщение">×</button>
+        </div>
+      }
+
+      @if (view() === 'create') {
+        <div class="page-intro">
+          <div class="eyebrow">Конструктор кампаний <span class="eyebrow-line"></span> 01 / 02</div>
+          <h1>Новая кампания<span class="title-dot">.</span></h1>
+          <p>Одна страна направляется на Google. Все остальные переходы идут на выбранный оффер.</p>
+        </div>
+        <div class="create-layout">
+          <section class="panel form-panel" aria-labelledby="create-title">
+            <div class="panel-heading">
+              <div>
+                <span class="panel-kicker">Настройки</span>
+                <h2 id="create-title">Параметры кампании</h2>
+              </div>
+              <span class="panel-icon">↗</span>
+            </div>
+            <form (ngSubmit)="createCampaign()" novalidate>
+              <div class="field full">
+                <label for="suffix">Название кампании</label>
+                <div class="prefix-input">
+                  <span>{{ prefix() }}</span
+                  ><input
+                    id="suffix"
+                    name="suffix"
+                    [(ngModel)]="form.suffix"
+                    placeholder="campaign1"
+                    maxlength="200"
+                    required
+                  />
+                </div>
+                <small
+                  >Полное название: <strong>{{ fullName }}</strong></small
+                >
+              </div>
+              <div class="field-grid">
+                <div class="field">
+                  <label for="geo">GEO-код страны</label
+                  ><input
+                    id="geo"
+                    name="geo"
+                    [(ngModel)]="form.geo"
+                    maxlength="2"
+                    placeholder="US"
+                    autocomplete="off"
+                    required
+                  /><small>Две латинские буквы, например US.</small>
+                </div>
+                <div class="field">
+                  <label for="offer">ID оффера Keitaro</label
+                  ><input
+                    id="offer"
+                    name="offer"
+                    type="number"
+                    min="1"
+                    list="offer-list"
+                    [(ngModel)]="form.offer_id"
+                    required
+                  />
+                  <datalist id="offer-list">
+                    @for (offer of meta()?.offers ?? []; track offer.id) {
+                      <option [value]="offer.id">{{ offer.name }}</option>
+                    }
+                  </datalist>
+                  <small>{{ optionName(meta()?.offers, form.offer_id) }}</small>
+                </div>
+                <div class="field">
+                  <label for="domain">Домен</label
+                  ><select id="domain" name="domain" [(ngModel)]="form.domain_id" required>
+                    <option [ngValue]="0">Выберите домен</option>
+                    @for (domain of meta()?.domains ?? []; track domain.id) {
+                      <option [ngValue]="domain.id">{{ domain.name }}</option>
+                    }
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="group">Группа кампаний</label
+                  ><select id="group" name="group" [(ngModel)]="form.group_id" required>
+                    <option [ngValue]="0">Выберите группу</option>
+                    @for (group of meta()?.groups ?? []; track group.id) {
+                      <option [ngValue]="group.id">{{ group.name }}</option>
+                    }
+                  </select>
+                </div>
+                <div class="field full">
+                  <label for="source">Источник трафика</label
+                  ><select id="source" name="source" [(ngModel)]="form.traffic_source_id" required>
+                    <option [ngValue]="0">Выберите источник</option>
+                    @for (source of meta()?.sources ?? []; track source.id) {
+                      <option [ngValue]="source.id">{{ source.name }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+              <div class="form-actions">
+                <span>Кампания станет активной после настройки обоих потоков.</span
+                ><button
+                  class="primary-button"
+                  type="submit"
+                  [disabled]="busy() || loading()"
+                  [attr.aria-busy]="busy()"
+                >
+                  {{ busy() ? 'Создаём…' : 'Создать кампанию' }} <span>→</span>
+                </button>
+              </div>
+            </form>
+          </section>
+          <aside class="routing-card" aria-label="Схема маршрутизации">
+            <div class="routing-top">
+              <span>Логика перехода</span><span class="routing-symbol">⌁</span>
+            </div>
+            <h2>Два потока.<br />Один маршрут.</h2>
+            <div class="routing-line">
+              <span class="routing-node">01</span>
+              <div>
+                <strong>{{ form.geo.toUpperCase() || 'GEO' }}</strong
+                ><small>Посетители из страны</small>
+              </div>
+              <span class="routing-arrow">→</span><strong>Google</strong>
+            </div>
+            <div class="routing-line">
+              <span class="routing-node">02</span>
+              <div><strong>Остальные</strong><small>Поток по умолчанию</small></div>
+              <span class="routing-arrow">→</span><strong>Оффер</strong>
+            </div>
+            <p>
+              Порядок потоков фиксирован. Первый фильтрует выбранную страну, второй принимает
+              оставшийся трафик.
+            </p>
+          </aside>
+        </div>
+      } @else {
+        <div class="page-intro edit-intro">
+          <div class="eyebrow">Редактор кампаний <span class="eyebrow-line"></span> 02 / 02</div>
+          <h1>Офферы и потоки<span class="title-dot">.</span></h1>
+          <p>
+            Изменения сохраняются в Keitaro. После каждого действия данные перечитываются из
+            трекера.
+          </p>
+        </div>
+        @if (loadingDetail()) {
+          <div class="panel loading-panel">Загружаем кампанию и потоки…</div>
+        }
+        @if (detail(); as data) {
+          <section class="campaign-summary panel">
+            <div>
+              <span class="panel-kicker">Кампания #{{ data.campaign.id }}</span>
+              <h2>{{ data.campaign.name }}</h2>
+              <span class="summary-status" [class.inactive]="data.campaign.state !== 'active'"
+                ><span class="status-dot"></span
+                >{{ data.campaign.state === 'active' ? 'Активна' : data.campaign.state }}</span
+              >
+            </div>
+            <div class="summary-metrics">
+              <div>
+                <strong>{{ data.streams.length }}</strong
+                ><span>Потоки</span>
+              </div>
+              <div>
+                <strong>{{ activeOfferCount }}</strong
+                ><span>Активные офферы</span>
+              </div>
+            </div>
+          </section>
+          <div class="detail-grid">
+            <section class="panel streams-panel">
+              <div class="panel-heading">
+                <div>
+                  <span class="panel-kicker">Маршрутизация</span>
+                  <h2>Потоки кампании</h2>
+                </div>
+                <button
+                  class="text-button"
+                  type="button"
+                  (click)="refreshDetail()"
+                  [disabled]="loadingDetail()"
+                >
+                  Обновить ↻
+                </button>
+              </div>
+              <div class="stream-list">
+                @for (stream of data.streams; track stream.id) {
+                  <div class="stream-item">
+                    <span class="stream-index">{{
+                      stream.position.toString().padStart(2, '0')
+                    }}</span>
+                    <div>
+                      <strong>{{ stream.name }}</strong
+                      ><small
+                        >{{
+                          stream.type === 'forced'
+                            ? 'Принудительный'
+                            : stream.type === 'default'
+                              ? 'По умолчанию'
+                              : 'Обычный'
+                        }}
+                        · {{ stream.state === 'active' ? 'Активен' : 'Выключен' }}</small
+                      >
+                      @if (stream.filters.length) {
+                        <span class="stream-filter"
+                          >{{ stream.filters[0].payload.join(', ') }} →
+                          {{ stream.action_payload || 'действие' }}</span
+                        >
+                      } @else {
+                        <span class="stream-filter">Офферов: {{ stream.offers.length }}</span>
+                      }
+                    </div>
+                  </div>
+                } @empty {
+                  <p class="empty-text">В кампании нет потоков.</p>
+                }
+              </div>
+            </section>
+            <section class="panel offers-panel">
+              <div class="panel-heading">
+                <div>
+                  <span class="panel-kicker">Редактор</span>
+                  <h2>Офферы потока</h2>
+                </div>
+                <span class="panel-icon">↔</span>
+              </div>
+              <div class="field">
+                <label for="stream-select">Поток с офферами</label
+                ><select
+                  id="stream-select"
+                  [(ngModel)]="selectedStreamId"
+                  (ngModelChange)="newOfferId = 0; confirmRemoveId = 0"
+                >
+                  <option [ngValue]="0">Выберите поток</option>
+                  @for (stream of data.streams; track stream.id) {
+                    @if (stream.schema === 'landings' && stream.state === 'active') {
+                      <option [ngValue]="stream.id">{{ stream.name }} · #{{ stream.id }}</option>
+                    }
+                  }
+                </select>
+              </div>
+              @if (selectedStream; as stream) {
+                <div class="offer-table-head">
+                  <span>Оффер</span><span>Вес / доля</span><span>Действие</span>
+                </div>
+              @if (confirmRemoveId && stream.offers.length === 1) {
+                <p class="last-offer-warning" role="status">
+                  После удаления поток останется без офферов. Добавьте оффер обратно, чтобы возобновить направление трафика.
+                </p>
+              }
+                @for (offer of stream.offers; track offer.id) {
+                  <div class="offer-row">
+                    <div class="offer-label">
+                      <strong>{{ offer.name }}</strong
+                      ><small
+                        >#{{ offer.id }} ·
+                        {{ offer.state === 'active' ? 'активен' : 'выключен' }}</small
+                      >
+                    </div>
+                    <div class="offer-share">
+                      <strong>{{ offer.share }}</strong
+                      ><small>≈ {{ offer.percentage | number: '1.0-2' }}%</small>
+                    </div>
+                    <div class="offer-action">
+                      @if (confirmRemoveId === offer.id) {
+                        <button
+                          class="danger-button"
+                          type="button"
+                          (click)="removeOffer(offer)"
+                          [disabled]="busy()"
+                        >
+                          Удалить</button
+                        ><button class="cancel-button" type="button" (click)="confirmRemoveId = 0">
+                          Отмена
+                        </button>
+                      } @else {
+                        <button
+                          class="remove-button"
+                          type="button"
+                          [disabled]="busy()"
+                          (click)="confirmRemoveId = offer.id"
+                          [attr.aria-label]="'Удалить оффер ' + offer.name"
+                        >
+                          Удалить
+                        </button>
+                      }
+                    </div>
+                  </div>
+                } @empty {
+                  <p class="empty-text">В потоке нет офферов. Добавьте оффер, чтобы направить трафик.</p>
+                }
+                <div class="add-offer">
+                  <label for="new-offer">Добавить оффер</label>
+                  <div class="add-offer-controls">
+                    <select
+                      id="new-offer"
+                      [(ngModel)]="newOfferId"
+                      [disabled]="availableOffers.length === 0"
+                    >
+                      <option [ngValue]="0">Выберите оффер</option>
+                      @for (offer of availableOffers; track offer.id) {
+                        <option [ngValue]="offer.id">{{ offer.name }} · #{{ offer.id }}</option>
+                      }</select
+                    ><button
+                      class="primary-button"
+                      type="button"
+                      (click)="addOffer()"
+                      [disabled]="!newOfferId || busy()"
+                      [attr.aria-busy]="busy()"
+                    >
+                      Добавить <span>＋</span>
+                    </button>
+                  </div>
+                  @if (availableOffers.length === 0) {
+                    <small>Других активных офферов в Keitaro сейчас нет.</small>
+                  } @else {
+                    <small
+                      >Новый оффер получает вес 100. Доля показывает отношение веса к сумме активных
+                      офферов.</small
+                    >
+                  }
+                </div>
+              } @else {
+                <p class="empty-text">Выберите активный поток с офферами для редактирования.</p>
+              }
+            </section>
+          </div>
+          <div class="detail-footer">
+            <span
+              >Домен:
+              <strong>{{ optionName(meta()?.domains, data.campaign.domain_id) }}</strong></span
+            ><span
+              >Группа:
+              <strong>{{ optionName(meta()?.groups, data.campaign.group_id) }}</strong></span
+            ><span
+              >Источник:
+              <strong>{{
+                optionName(meta()?.sources, data.campaign.traffic_source_id)
+              }}</strong></span
+            >
+          </div>
+        }
+      }
+    </main>
+  </div>
+</div>
