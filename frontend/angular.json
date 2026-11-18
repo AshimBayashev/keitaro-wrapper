@@ -50,6 +50,10 @@
               }
             ],
             "styles": [
+              "node_modules/ng-zorro-antd/style/index.min.css",
+              "node_modules/ng-zorro-antd/button/style/index.min.css",
+              "node_modules/ng-zorro-antd/input/style/index.min.css",
+              "node_modules/ng-zorro-antd/select/style/index.min.css",
               "src/styles.css"
             ]
           },
@@ -58,7 +62,7 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
+                  "maximumWarning": "750kB",
                   "maximumError": "1MB"
                 },
                 {

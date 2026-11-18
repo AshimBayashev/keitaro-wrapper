@@ -106,6 +106,7 @@
                 <div class="prefix-input">
                   <span>{{ prefix() }}</span
                   ><input
+                    nz-input
                     id="suffix"
                     name="suffix"
                     [(ngModel)]="form.suffix"
@@ -121,22 +122,25 @@
               <div class="field-grid">
                 <div class="field">
                   <label for="geo">Страна</label
-                  ><select
-                    id="geo"
+                  ><nz-select
+                    nzId="geo"
                     name="geo"
                     [(ngModel)]="form.geo"
+                    nzPlaceHolder="Выберите страну"
+                    nzNotFoundContent="Страна не найдена"
+                    [nzShowSearch]="true"
                     required
                   >
-                    <option value="">Выберите страну</option>
                     @for (country of countries(); track country.code) {
-                      <option [value]="country.code">{{ country.name }} · {{ country.code }}</option>
+                      <nz-option [nzValue]="country.code" [nzLabel]="country.name + ' · ' + country.code" />
                     }
-                  </select>
+                  </nz-select>
                   <small>Код страны будет использован в фильтре Keitaro.</small>
                 </div>
                 <div class="field">
                   <label for="offer">ID оффера Keitaro</label
                   ><input
+                    nz-input
                     id="offer"
                     name="offer"
                     type="number"
@@ -154,38 +158,38 @@
                 </div>
                 <div class="field">
                   <label for="domain">Домен</label
-                  ><select id="domain" name="domain" [(ngModel)]="form.domain_id" required>
-                    <option [ngValue]="0">Выберите домен</option>
+                  ><nz-select nzId="domain" name="domain" [(ngModel)]="form.domain_id" nzPlaceHolder="Выберите домен" required>
                     @for (domain of meta()?.domains ?? []; track domain.id) {
-                      <option [ngValue]="domain.id">{{ domain.name }}</option>
+                      <nz-option [nzValue]="domain.id" [nzLabel]="domain.name" />
                     }
-                  </select>
+                  </nz-select>
                 </div>
                 <div class="field">
                   <label for="group">Группа кампаний</label
-                  ><select id="group" name="group" [(ngModel)]="form.group_id" required>
-                    <option [ngValue]="0">Выберите группу</option>
+                  ><nz-select nzId="group" name="group" [(ngModel)]="form.group_id" nzPlaceHolder="Выберите группу" [nzShowSearch]="true" required>
                     @for (group of meta()?.groups ?? []; track group.id) {
-                      <option [ngValue]="group.id">{{ group.name }}</option>
+                      <nz-option [nzValue]="group.id" [nzLabel]="group.name" />
                     }
-                  </select>
+                  </nz-select>
                 </div>
                 <div class="field full">
                   <label for="source">Источник трафика</label
-                  ><select id="source" name="source" [(ngModel)]="form.traffic_source_id" required>
-                    <option [ngValue]="0">Выберите источник</option>
+                  ><nz-select nzId="source" name="source" [(ngModel)]="form.traffic_source_id" nzPlaceHolder="Выберите источник" required>
                     @for (source of meta()?.sources ?? []; track source.id) {
-                      <option [ngValue]="source.id">{{ source.name }}</option>
+                      <nz-option [nzValue]="source.id" [nzLabel]="source.name" />
                     }
-                  </select>
+                  </nz-select>
                 </div>
               </div>
               <div class="form-actions">
                 <span>Кампания станет активной после настройки обоих потоков.</span
                 ><button
+                  nz-button
+                  nzType="primary"
                   class="primary-button"
                   type="submit"
                   [disabled]="busy() || loading()"
+                  [nzLoading]="busy()"
                   [attr.aria-busy]="busy()"
                 >
                   {{ busy() ? 'Создаём…' : 'Создать кампанию' }} <span>→</span>
@@ -309,18 +313,18 @@
               </div>
               <div class="field">
                 <label for="stream-select">Поток с офферами</label
-                ><select
-                  id="stream-select"
+                ><nz-select
+                  nzId="stream-select"
                   [(ngModel)]="selectedStreamId"
+                  nzPlaceHolder="Выберите поток"
                   (ngModelChange)="newOfferId = 0; confirmRemoveId = 0"
                 >
-                  <option [ngValue]="0">Выберите поток</option>
                   @for (stream of data.streams; track stream.id) {
                     @if (stream.schema === 'landings' && stream.state === 'active') {
-                      <option [ngValue]="stream.id">{{ stream.name }} · #{{ stream.id }}</option>
+                      <nz-option [nzValue]="stream.id" [nzLabel]="stream.name + ' · #' + stream.id" />
                     }
                   }
-                </select>
+                </nz-select>
               </div>
               @if (selectedStream; as stream) {
                 <div class="offer-table-head">
@@ -375,20 +379,24 @@
                 <div class="add-offer">
                   <label for="new-offer">Добавить оффер</label>
                   <div class="add-offer-controls">
-                    <select
-                      id="new-offer"
+                    <nz-select
+                      nzId="new-offer"
                       [(ngModel)]="newOfferId"
-                      [disabled]="availableOffers.length === 0"
+                      nzPlaceHolder="Выберите оффер"
+                      [nzShowSearch]="true"
+                      [nzDisabled]="availableOffers.length === 0"
                     >
-                      <option [ngValue]="0">Выберите оффер</option>
                       @for (offer of availableOffers; track offer.id) {
-                        <option [ngValue]="offer.id">{{ offer.name }} · #{{ offer.id }}</option>
-                      }</select
+                        <nz-option [nzValue]="offer.id" [nzLabel]="offer.name + ' · #' + offer.id" />
+                      }</nz-select
                     ><button
+                      nz-button
+                      nzType="primary"
                       class="primary-button"
                       type="button"
                       (click)="addOffer()"
                       [disabled]="!newOfferId || busy()"
+                      [nzLoading]="busy()"
                       [attr.aria-busy]="busy()"
                     >
                       Добавить <span>＋</span>

@@ -17,7 +17,7 @@
 
 | Capability | Owner | Behavior |
 |---|---|---|
-| Select/Listbox | Нативные `<select>` в `frontend/src/app/app.html` | Страна выбирается по названию и коду; клавиатура и выбор платформы |
+| Select/Listbox | NG-ZORRO `nz-select` в `frontend/src/app/app.html` | Страна выбирается поиском по названию или коду; клавиатура, пустой результат и выбранное значение принадлежат компоненту |
 | Form | `App.createCampaign`, FastAPI `CreateCampaign` и `COUNTRY_CODES` | Проверка обязательных полей и кода страны на фронте и сервере |
 | Scrollbar | `frontend/src/app/app.css` | Прокрутка списка кампаний; форма прокручивается страницей |
 | Feedback | `App.error` и `App.notice` | Видимые сообщения с live-region semantics |

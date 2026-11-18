@@ -3,6 +3,9 @@ import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http'
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzSelectModule } from 'ng-zorro-antd/select';
 
 type Option = { id: number; name: string };
 type Country = { code: string; name: string };
@@ -32,7 +35,7 @@ type Stream = {
 type Detail = { campaign: Campaign; streams: Stream[] };
 
 @Component({
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, NzButtonModule, NzInputModule, NzSelectModule],
   selector: 'app-root',
   styleUrl: './app.css',
   templateUrl: './app.html',

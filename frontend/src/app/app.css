@@ -282,6 +282,7 @@
   background: #a6c5c2;
 }
 .page-intro h1 {
+  color: var(--ink);
   font-size: clamp(36px, 4vw, 55px);
   line-height: 1.05;
   letter-spacing: -0.055em;
@@ -320,6 +321,7 @@
   margin-bottom: 27px;
 }
 .panel-heading h2 {
+  color: var(--ink);
   margin: 7px 0 0;
   font-size: 21px;
   letter-spacing: -0.035em;
@@ -354,9 +356,14 @@
   font-weight: 750;
   margin-bottom: 9px;
 }
-.field input,
-.field select,
-.add-offer select {
+.field nz-select,
+.add-offer nz-select {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: 44px;
+}
+.field input {
   height: 44px;
   width: 100%;
   border: 1px solid #cfdcde;
@@ -369,9 +376,7 @@
     border-color 0.15s,
     box-shadow 0.15s;
 }
-.field input:focus,
-.field select:focus,
-.add-offer select:focus {
+.field input:focus {
   border-color: #19a49a;
   box-shadow: 0 0 0 3px #dff3ef;
 }
@@ -504,6 +509,7 @@
   color: #54c4b6;
 }
 .routing-card h2 {
+  color: #fff;
   position: relative;
   font-size: 31px;
   line-height: 1.1;
@@ -589,6 +595,7 @@
   margin-bottom: 23px;
 }
 .campaign-summary h2 {
+  color: var(--ink);
   font-size: 23px;
   letter-spacing: -0.04em;
   margin: 8px 0 13px;
@@ -774,8 +781,7 @@
   display: flex;
   gap: 9px;
 }
-.add-offer select {
-  min-width: 0;
+.add-offer nz-select {
   flex: 1;
 }
 .add-offer .primary-button {
