@@ -844,7 +844,6 @@
   .sidebar-section-label,
   .search-box,
   .campaign-list,
-  .load-more,
   .sidebar-foot {
     display: none;
   }
@@ -912,6 +911,10 @@
     max-height: 180px;
     overflow: auto;
     margin-top: 10px;
+  }
+  .sidebar .load-more {
+    display: block;
+    width: 100%;
   }
   .sidebar .search-box {
     display: flex;
